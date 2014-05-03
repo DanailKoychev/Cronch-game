@@ -25,13 +25,13 @@ class Character(Sprite):
         distance_traveled = self.move_speed * time_passed
         self.position.x -= distance_traveled
         self.rect.x = self.position.x
-        self.aim.x -= distance_traveled
+        #self.aim.x -= distance_traveled
 
     def move_righ(self, time_passed):
         distance_traveled = self.move_speed * time_passed
         self.position.x += distance_traveled
         self.rect.x = self.position.x
-        self.aim.x += distance_traveled
+        #self.aim.x += distance_traveled
  
     def shoot(self):
         shot = Projectile(self.projectile_type.image,
