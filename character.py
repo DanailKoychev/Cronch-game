@@ -1,9 +1,12 @@
 from pygame.sprite import Sprite, Group, Rect
 from copy import copy
+from point import *
+from projectile import *
 
-class Character(Spire):
+class Character(Sprite):
     def __init__(self, image, position, move_speed, time_between_shots,
-                 projectile_type, health, damage):
+                 projectile_type, health, damage, aim_speed):
+        Sprite.__init__(self)
         self.position = position
         self.image = image
         self.rect = image.get_rect()
@@ -15,21 +18,33 @@ class Character(Spire):
         self.health = health
         self.damage = damage
         self.active_projectiles = []
-        self.aim = (0, 0)
+        self.aim = Point(100, 0)
+        self.aim_speed = aim_speed
 
     def move_left(self, time_passed):
-        distance_traveled = self.speed * time_passed
+        distance_traveled = self.move_speed * time_passed
         self.position.x -= distance_traveled
+        self.rect.x = self.position.x
         self.aim.x -= distance_traveled
 
     def move_righ(self, time_passed):
-        distance_traveled = self.speed * time_passed
+        distance_traveled = self.move_speed * time_passed
         self.position.x += distance_traveled
+        self.rect.x = self.position.x
         self.aim.x += distance_traveled
+ 
+    def shoot(self):
+        shot = Projectile(self.projectile_type.image,
+                          Point(self.position.x, self.position.y),
+                          self.projectile_type.speed,
+                          Point(self.aim.x, self.aim.y),
+                          0)
+        shot.movement_vector = shot.get_movement_vector()
+        self.active_projectiles.append(shot)
+        return shot
 
-    # def shoot(self, projectile=None):
-    def shoot(self): 
-        projectile = copy(projectile_type)    
-        self.active_projectiles.append(projectile)
-        projectile.position = self.position
-        projectile.aim = self.aim
+    def move_aim_left(self, time_passed):
+        self.aim.x -= self.aim_speed * time_passed
+
+    def move_aim_right(self, time_passed):
+        self.aim.x += self.aim_speed * time_passed
