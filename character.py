@@ -4,47 +4,87 @@ from point import *
 from projectile import *
 
 class Character(Sprite):
-    def __init__(self, image, position, move_speed, time_between_shots,
+    def __init__(self, image, position, move_speed, reload_time_millisec,
                  projectile_type, health, damage, aim_speed):
         Sprite.__init__(self)
+        self.rect = image.get_rect()
         self.position = position
         self.image = image
-        self.rect = image.get_rect()
-        self.rect.x = position.x
-        self.rect.y = position.y
         self.move_speed = move_speed
-        self.time_between_shots = time_between_shots
+        self.reload_time_millisec = reload_time_millisec
+
         self.projectile_type = projectile_type
         self.health = health
         self.damage = damage
         self.active_projectiles = []
-        self.aim = Point(100, 0)
+        self.aim = Point(-3, 0)
         self.aim_speed = aim_speed
 
+        self.ready_to_shoot = True
+        self.disarmed = False
+        self.snared = False
+        self.vampire = False
+
+    @property
+    def position(self):
+        return self._position
+    @position.setter
+    def position(self, value):
+        self.rect.x = value.x
+        self.rect.y = value.y
+        self._position = value
+
     def move_left(self, time_passed):
-        distance_traveled = self.move_speed * time_passed
-        self.position.x -= distance_traveled
-        self.rect.x = self.position.x
-        #self.aim.x -= distance_traveled
+        if not self.snared:
+            distance_traveled = self.move_speed * time_passed
+            self.position.x -= distance_traveled
+            self.rect.x = self.position.x
+            #self.aim.x -= distance_traveled # alternative aiming system
 
     def move_righ(self, time_passed):
-        distance_traveled = self.move_speed * time_passed
-        self.position.x += distance_traveled
-        self.rect.x = self.position.x
-        #self.aim.x += distance_traveled
+        if not self.snared:
+            distance_traveled = self.move_speed * time_passed
+            self.position.x += distance_traveled
+            self.rect.x = self.position.x
+            #self.aim.x += distance_traveled # alternative aiming system
  
+    def try_shoot(self, time_passed):
+        if self.ready_to_shoot and not self.disarmed:
+            self.shoot()
+            self.start_reloading()
+
     def shoot(self):
         shot = Projectile(self.projectile_type.image,
-                          Point(self.position.x, self.position.y),
+                          Point(self.position.x + self.rect.width/2,
+                                self.position.y),
                           self.projectile_type.speed,
                           Point(self.aim.x, self.aim.y),
+                          #self.aim,
                           0)
         shot.movement_vector = shot.get_movement_vector()
         self.active_projectiles.append(shot)
         return shot
+
+    def start_reloading(self):
+        self.ready_to_shoot = False
+        self.reload_time_left = self.reload_time_millisec
 
     def move_aim_left(self, time_passed):
         self.aim.x -= self.aim_speed * time_passed
 
     def move_aim_right(self, time_passed):
         self.aim.x += self.aim_speed * time_passed
+
+    def update(self, time_passed):
+        if self.disarmed:
+            self.disarm_time_left -= time_passed
+            if self.disarm_time_left <= 0:
+                self.disarmed = False
+        if self.snared:
+            self.snare_time_left -= time_passed
+            if self.snare_time_left <=0:
+                self.snared = False
+        if not self.ready_to_shoot:
+            self.reload_time_left -= time_passed
+            if self.reload_time_left <= 0:
+                self.ready_to_shoot = True
