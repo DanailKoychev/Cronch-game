@@ -12,12 +12,11 @@ class Character(Sprite):
         self.image = image
         self.move_speed = move_speed
         self.reload_time_millisec = reload_time_millisec
-
         self.projectile_type = projectile_type
         self.health = health
         self.damage = damage
-        self.active_projectiles = []
-        self.aim = Point(-3, 0)
+        self.active_projectiles = Group()
+        self.aim = Point(400, 0)
         self.aim_speed = aim_speed
 
         self.ready_to_shoot = True
@@ -39,14 +38,14 @@ class Character(Sprite):
             distance_traveled = self.move_speed * time_passed
             self.position.x -= distance_traveled
             self.rect.x = self.position.x
-            #self.aim.x -= distance_traveled # alternative aiming system
+            self.aim.x -= distance_traveled # alternative aiming system
 
     def move_righ(self, time_passed):
         if not self.snared:
             distance_traveled = self.move_speed * time_passed
             self.position.x += distance_traveled
             self.rect.x = self.position.x
-            #self.aim.x += distance_traveled # alternative aiming system
+            self.aim.x += distance_traveled # alternative aiming system
  
     def try_shoot(self, time_passed):
         if self.ready_to_shoot and not self.disarmed:
@@ -58,11 +57,10 @@ class Character(Sprite):
                           Point(self.position.x + self.rect.width/2,
                                 self.position.y),
                           self.projectile_type.speed,
-                          Point(self.aim.x, self.aim.y),
                           #self.aim,
                           0)
-        shot.movement_vector = shot.get_movement_vector()
-        self.active_projectiles.append(shot)
+        shot.movement_vector = shot.get_movement_vector(self.aim)
+        self.active_projectiles.add(shot)
         return shot
 
     def start_reloading(self):
