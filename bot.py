@@ -22,9 +22,12 @@ class Bot:
         self.character.aim.y = self.enemy.y
 
     def get_projectile_flight_time(projectile, point_1, point_2):
+        initial_projectile_position = projectile.position
         projectile.position = point_1
-        return math.fabs(point_1.y - point_2.y) /\
+        flight_time = math.fabs(point_1.y - point_2.y) /\
                math.fabs(projectile.get_movement_vector(point_2).y)
+        projectile.position = initial_projectile_position
+        return flight_time
 
     def get_movement_range(self, character, time): 
         return (character.x - character.speed * time, 
@@ -50,9 +53,12 @@ class Bot:
     def spray_projectiles(self):
         if self.character.ready_to_shoot:
             enemy_movement_range = self.get_movement_range(self.enemy, \
-                                   Bot.get_projectile_flight_time(self.character.projectile_type, self.character.position, self.enemy.position))
-            self.character.aim.x = random.randint(int(enemy_movement_range[0] + self.enemy.size.x), \
-                                              int(enemy_movement_range[1] - self.enemy.size.x))
+                                   Bot.get_projectile_flight_time( \
+                                   self.character.projectile_type, \
+                                   self.character.position, self.enemy.position))
+            self.character.aim.x = random.randint( \
+                            int(enemy_movement_range[0] + self.enemy.size.x),\
+                            int(enemy_movement_range[1] - self.enemy.size.x))
         return controls.SHOOT
 
     def move_towards(self, point_x):
