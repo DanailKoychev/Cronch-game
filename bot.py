@@ -1,6 +1,7 @@
 import game
 import character
 
+import input_getter
 import random
 import math
 
@@ -20,10 +21,12 @@ class Bot:
         else:
             self.enemy = self.game.player_1
 
-    def get_approximate_own_projectile_flight_time(self):
-        self.character.projectile_type.position = self.character.position
-        return math.fabs(self.character.position.y - self.enemy.position.y) / \
-               math.fabs(self.character.projectile_type.get_movement_vector(self.enemy.position ).y)
+        self.character.aim.y = self.enemy.position.y
+
+    def get_projectile_flight_time(projectile, point_1, point_2):
+        projectile.position = point_1
+        return math.fabs(point_1.y - point_2.y) /\
+               math.fabs(projectile.get_movement_vector(point_2).y)
 
     def get_movement_range(self, character, time): 
         return (character.position.x - character.speed * time, 
@@ -47,79 +50,60 @@ class Bot:
         return expected_position_x
 
     def spray_projectiles(self):
-        enemy_movement_range = self.get_movement_range(self.enemy, self.get_approximate_own_projectile_flight_time())
-        self.character.aim.x = random.randint(int(enemy_movement_range[0] + self.enemy.size.x), \
+        if self.character.ready_to_shoot:
+            enemy_movement_range = self.get_movement_range(self.enemy, \
+                                   Bot.get_projectile_flight_time(self.character.projectile_type, self.character.position, self.enemy.position))
+            self.character.aim.x = random.randint(int(enemy_movement_range[0] + self.enemy.size.x), \
                                               int(enemy_movement_range[1] - self.enemy.size.x))
-        self.character.try_shoot()
+        return input_getter.SHOOT
 
     def move_towards(self, point_x):
-        if math.fabs(self.character.position.x - point_x) < \
-           (self.character.speed * 1000) / Game.FPS:
-           self.character.position.x = point_x
-           self.state = STATIONARY
-        elif self.character.position.x > point_x:
-            self.character.state = MOVING_LEFT
+        if self.character.position.x > point_x:
+            return input_getter.MOVE_LEFT
         elif self.character.position.x < point_x:
-            self.character.state = MOVING_RIGHT
-        else:
-            self.character.state = STATIONARY
+            return input_getter.MOVE_RIGHT
 
     def move_away(self, point_x):
         if self.character.position.x <= point_x:
-            self.character.state = MOVING_LEFT
+            return input_getter.MOVE_LEFT
         else:
-            self.character.state = MOVING_RIGHT
+            return input_getter.MOVE_RIGHT
 
     def is_hidden(self):
         middle_point = (self.character.position.x + self.enemy.position.x) / 2
         for wall in self.game.walls:
-            if wall.position.x + wall.size[0] / 2 > middle_point and \
-               wall.position.x - wall.size[0] / 2 < middle_point:
+            if wall.position.x + wall.size.x / 2 > middle_point and \
+               wall.position.x - wall.size.x / 2 < middle_point:
                 self.wall_shield = wall   
                 return True
         return False
 
     def hide(self):
         safest_point = 2 * self.wall_shield.position.x - self.enemy.position.x
-        self.move_towards(safest_point)
-        #if safest_point > 0 and safest_point < Game.FIELD_WIDTH:
+        return self.move_towards(safest_point)
 
-#    def unhide(self):
- 
-    # def get_closest_wall_to_reach(self):    # if the current closest wall is moving away it might not be the fastest one to reach
-    #     closest_wall = None
-    #     distance = Game.FIELD_WIDTH
-    #     for wall in self.game.walls:
-    #         if math.fabs(wall.position.x - self.character.position.x) < distance:
-    #             distance = math.fabs(wall.position.x - self.character.position.x)
-    #             closest_wall = wall
-    #     return closest_wall
-    #     for wall in game.walls:
-
-
-
-    # def get_projectile_destination_x(self, projectile):
-    #     return (projectile.movement_vector.x / projectile.movement_vector.y) * \
-    #             math.fabs(projectile.position.y - self.character.position.y) + \
-    #             projectile.position.x
 
     def get_closest_wall(self):
-        if not self.game.walls:
-            return None
-        return min([wall for wall in self.game.walls], \
+        if self.game.walls:
+            return min([wall for wall in self.game.walls], \
                     key=lambda wall: math.fabs(wall.position.x - \
                     self.character.position.x))
 
     def dodge_projectiles(self):
         threats_from_left_count = 0
         threatening_projectiles = self.get_threatening_projectiles()
+        if self.character.position.x < 1.5 * self.character.size.x:
+            return input_getter.MOVE_RIGHT
+        if self.character.position.x > \
+           Game.FIELD_WIDTH - 1.5 * self.character.size.x:
+            return input_getter.MOVE_LEFT
         for projectile in threatening_projectiles:
             if projectile.aim.x >= self.character.position.x:
                 threats_from_left_count += 1
         if threats_from_left_count < len(threatening_projectiles) / 2:
-            self.character.state = MOVING_RIGHT
-        else:
-            self.character.state = MOVING_LEFT
+            return input_getter.MOVE_RIGHT
+        elif threats_from_left_count > len(threatening_projectiles) / 2:
+            return input_getter.MOVE_LEFT
 
     def get_threatening_projectiles(self):
         return [projectile for projectile in self.enemy.active_projectiles \
@@ -131,28 +115,29 @@ class Bot:
            return True
         return False
 
+    def move_randomly(self):
+        move = random.randint(0,2)
+        if move == 0:
+            return input_getter.MOVE_LEFT
+        elif move == 2:
+            return input_getter.MOVE_RIGHT
+
     def defend(self):
+        movement_instructions = []
         self.wall_shield = self.get_closest_wall()
-        if not self.is_hidden() and len(self.get_threatening_projectiles()) > 0:
-            self.dodge_projectiles()
-        elif self.wall_shield != None:
-            self.hide()
-        else:
-            self.character.state = STATIONARY
-         
+        if len(self.get_threatening_projectiles()) > 0:
+            movement_instructions.append(self.dodge_projectiles())
+        elif self.wall_shield != None:  
+            movement_instructions.append(self.hide())
+        return movement_instructions
+
+    def get_input(self):
+        # return [self.move_randomly()]
+
+        instructions = self.defend()
+        instructions.append(self.spray_projectiles())
+        return instructions
 
 
-
-
-
-    # def get_danger_projectiles():
-    #     return [projectile for projectile in self.enemy.active_projectiles \
-    #             if abs(projectile.y - self.character.y) < ]
-
-
-
-    # def move_away(self, projectile):
-    #     if projectile.
-
-
-
+    #def snipe()
+    # formula: self.character.aim.x = self.predict_enemy_position(self.get_approximate_own_projectile_flight_time())
