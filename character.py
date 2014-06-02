@@ -1,21 +1,21 @@
 from pygame.sprite import Sprite, Group, Rect
-from copy import copy
 from point import *
 from projectile import *
+
+from input_getter import *
 
 MOVING_LEFT = 0
 STATIONARY = 1
 MOVING_RIGHT = 2
 DEAD = 3
 
-
 class Character():
-    def __init__(self, position, size, move_speed, reload_time_millisec,
+    def __init__(self, position, size, speed, reload_time_millisec,
                  projectile_type, health, damage, aim_speed):
         self.state = STATIONARY
         self.position = position
         self.size = size
-        self.move_speed = move_speed
+        self.speed = speed
         self.reload_time_millisec = reload_time_millisec
         self.projectile_type = projectile_type
         self.health = health
@@ -27,21 +27,21 @@ class Character():
         self.ready_to_shoot = True
         self.disarmed = False
         self.snared = False
-        self.vampire = False
+        self.alive = True
 
-    def move_left(self, time_passed):
+    def __move_left(self, time_passed):
         if not self.snared:
-            distance_traveled = self.move_speed * time_passed
+            distance_traveled = self.speed * time_passed
             self.position.x -= distance_traveled
             self.aim.x -= distance_traveled # alternative aiming system
 
-    def move_right(self, time_passed):
+    def __move_right(self, time_passed):
         if not self.snared:
-            distance_traveled = self.move_speed * time_passed
+            distance_traveled = self.speed * time_passed
             self.position.x += distance_traveled
             self.aim.x += distance_traveled # alternative aiming system
  
-    def try_shoot(self, time_passed):
+    def try_shoot(self):
         if self.ready_to_shoot and not self.disarmed:
             self.shoot()
             self.start_reloading()
@@ -51,7 +51,8 @@ class Character():
                                 self.position.y),
                           self.projectile_type.size,
                           self.projectile_type.speed,
-                          0)
+                          self.projectile_type.damage,
+                          self.aim)
         shot.movement_vector = shot.get_movement_vector(self.aim)
         self.active_projectiles.append(shot)
         return shot
@@ -68,9 +69,9 @@ class Character():
 
     def update(self, time_passed):
         if self.state == MOVING_LEFT:
-            self.move_left(time_passed)
+            self.__move_left(time_passed)
         if self.state == MOVING_RIGHT:
-            self.move_right(time_passed)
+            self.__move_right(time_passed)
 
         if self.disarmed:
             self.disarm_time_left -= time_passed
@@ -80,7 +81,31 @@ class Character():
             self.snare_time_left -= time_passed
             if self.snare_time_left <=0:
                 self.snared = False
+                
         if not self.ready_to_shoot:
             self.reload_time_left -= time_passed
             if self.reload_time_left <= 0:
                 self.ready_to_shoot = True
+
+        if self.health <= 0:
+            self.alive = False
+
+    def use_input(self, instruction_set, time_passed):
+            if MOVE_LEFT in instruction_set:
+                self.state = MOVING_LEFT
+            elif MOVE_RIGHT in instruction_set:
+                self.state = MOVING_RIGHT
+            else:
+                self.state = STATIONARY 
+            if USE_SKILL in instruction_set:
+                raise NotImplementedError("no skills yet")
+            if AIM_LEFT in instruction_set:
+                self.move_aim_left(time_passed)
+            if AIM_RIGHT in instruction_set:
+                self.move_aim_right(time_passed)
+            if SHOOT in instruction_set:
+                self.try_shoot()
+
+
+    def get_hit(self, projectile):
+        self.health -= projectile.damage
