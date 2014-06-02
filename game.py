@@ -1,7 +1,6 @@
 from projectile import *
 from character import *
-from input_getter import *
-import itertools
+from controls import *
 import math
 from random import randint
 
@@ -56,20 +55,20 @@ class Game:
         for player, instruction_set in ((self.player_1, instrucions_player_1),\
                                        (self.player_2, instrucions_player_2)):
             player.use_input(instruction_set, time_passed)
-            if player.position.x  + player.size.x / 2 > Game.FIELD_WIDTH:
-               player.position.x = Game.FIELD_WIDTH - player.size.x / 2
-            if player.position.x - player.size.x / 2 < 0:
-               player.position.x = player.size.x / 2;
+            if player.x  + player.size.x / 2 > Game.FIELD_WIDTH:
+               player.x = Game.FIELD_WIDTH - player.size.x / 2
+            if player.x - player.size.x / 2 < 0:
+               player.x = player.size.x / 2;
             player.update(time_passed)
             
             for projectile in player.active_projectiles:
-                if (projectile.position.y < 0 or projectile.position.y > Game.FIELD_HEGHT):
+                if (projectile.y < 0 or projectile.y > Game.FIELD_HEGHT):
                     player.active_projectiles.remove(projectile)
                 else:
                     projectile.update(time_passed)
-                    if projectile.position.x < 0:
+                    if projectile.x < 0:
                         projectile.reflect_horizontally(0)
-                    elif projectile.position.x > Game.FIELD_WIDTH:
+                    elif projectile.x > Game.FIELD_WIDTH:
                         projectile.reflect_horizontally(Game.FIELD_WIDTH)
 
             for projectile in player.active_projectiles:
@@ -85,7 +84,7 @@ class Game:
         #     player.update(time_passed) 
 
         for wall in self.walls:
-            if wall.position.x < 0 - wall.size.x:
+            if wall.x < 0 - wall.size.x:
                 self.walls.remove(wall)
             else:
                 wall.update(time_passed)
@@ -95,6 +94,3 @@ class Game:
             self.time_since_last_wall = randint(Game.WALL_SPAWN_TIME_RANGE[0], \
                                                 Game.WALL_SPAWN_TIME_RANGE[1])
             self.walls.append(Wall(Point(100, 5), False, Game.FIELD_WIDTH, Game.FIELD_HEGHT))
-
-        # if time_passed > 18:
-        #     print("FAK UU GUBIIII")

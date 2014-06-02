@@ -1,10 +1,8 @@
-import game
-import character
-
-import input_getter
 import random
 import math
 
+import character
+import controls
 from game import *
 import character
 
@@ -21,7 +19,7 @@ class Bot:
         else:
             self.enemy = self.game.player_1
 
-        self.character.aim.y = self.enemy.position.y
+        self.character.aim.y = self.enemy.y
 
     def get_projectile_flight_time(projectile, point_1, point_2):
         projectile.position = point_1
@@ -29,19 +27,19 @@ class Bot:
                math.fabs(projectile.get_movement_vector(point_2).y)
 
     def get_movement_range(self, character, time): 
-        return (character.position.x - character.speed * time, 
-                character.position.x + character.speed * time)
+        return (character.x - character.speed * time, 
+                character.x + character.speed * time)
 
     def predict_enemy_position(self, time):
         expected_position_x = 0
         if self.enemy.state == MOVING_LEFT:
-            expected_position_x = self.enemy.position.x - \
+            expected_position_x = self.enemy.x - \
                                   self.enemy.speed * time
         elif self.enemy.state == MOVING_RIGHT:
-            expected_position_x = self.enemy.position.x + \
+            expected_position_x = self.enemy.x + \
                                   self.enemy.speed * time
         else:
-            expected_position_x = self.enemy.position.x
+            expected_position_x = self.enemy.x
 
         if expected_position_x < self.enemy.size.x / 2:
             expected_position_x = self.enemy.size.x / 2
@@ -55,62 +53,62 @@ class Bot:
                                    Bot.get_projectile_flight_time(self.character.projectile_type, self.character.position, self.enemy.position))
             self.character.aim.x = random.randint(int(enemy_movement_range[0] + self.enemy.size.x), \
                                               int(enemy_movement_range[1] - self.enemy.size.x))
-        return input_getter.SHOOT
+        return controls.SHOOT
 
     def move_towards(self, point_x):
-        if self.character.position.x > point_x:
-            return input_getter.MOVE_LEFT
-        elif self.character.position.x < point_x:
-            return input_getter.MOVE_RIGHT
+        if self.character.x > point_x:
+            return controls.MOVE_LEFT
+        elif self.character.x < point_x:
+            return controls.MOVE_RIGHT
 
     def move_away(self, point_x):
-        if self.character.position.x <= point_x:
-            return input_getter.MOVE_LEFT
+        if self.character.x <= point_x:
+            return controls.MOVE_LEFT
         else:
-            return input_getter.MOVE_RIGHT
+            return controls.MOVE_RIGHT
 
     def is_hidden(self):
-        middle_point = (self.character.position.x + self.enemy.position.x) / 2
+        middle_point = (self.character.x + self.enemy.x) / 2
         for wall in self.game.walls:
-            if wall.position.x + wall.size.x / 2 > middle_point and \
-               wall.position.x - wall.size.x / 2 < middle_point:
+            if wall.x + wall.size.x / 2 > middle_point and \
+               wall.x - wall.size.x / 2 < middle_point:
                 self.wall_shield = wall   
                 return True
         return False
 
     def hide(self):
-        safest_point = 2 * self.wall_shield.position.x - self.enemy.position.x
+        safest_point = 2 * self.wall_shield.position.x - self.enemy.x
         return self.move_towards(safest_point)
 
 
     def get_closest_wall(self):
         if self.game.walls:
             return min([wall for wall in self.game.walls], \
-                    key=lambda wall: math.fabs(wall.position.x - \
-                    self.character.position.x))
+                    key=lambda wall: math.fabs(wall.x - \
+                    self.character.x))
 
     def dodge_projectiles(self):
         threats_from_left_count = 0
         threatening_projectiles = self.get_threatening_projectiles()
-        if self.character.position.x < 1.5 * self.character.size.x:
-            return input_getter.MOVE_RIGHT
-        if self.character.position.x > \
+        if self.character.x < 1.5 * self.character.size.x:
+            return controls.MOVE_RIGHT
+        if self.character.x > \
            Game.FIELD_WIDTH - 1.5 * self.character.size.x:
-            return input_getter.MOVE_LEFT
+            return controls.MOVE_LEFT
         for projectile in threatening_projectiles:
-            if projectile.aim.x >= self.character.position.x:
+            if projectile.aim.x >= self.character.x:
                 threats_from_left_count += 1
         if threats_from_left_count < len(threatening_projectiles) / 2:
-            return input_getter.MOVE_RIGHT
+            return controls.MOVE_RIGHT
         elif threats_from_left_count > len(threatening_projectiles) / 2:
-            return input_getter.MOVE_LEFT
+            return controls.MOVE_LEFT
 
     def get_threatening_projectiles(self):
         return [projectile for projectile in self.enemy.active_projectiles \
                                              if self.is_threat(projectile)]
 
     def is_threat(self, projectile):
-        if math.fabs(self.character.position.x - projectile.aim.x) < \
+        if math.fabs(self.character.x - projectile.aim.x) < \
            self.character.size.x * 1.5:
            return True
         return False
@@ -118,9 +116,9 @@ class Bot:
     def move_randomly(self):
         move = random.randint(0,2)
         if move == 0:
-            return input_getter.MOVE_LEFT
+            return controls.MOVE_LEFT
         elif move == 2:
-            return input_getter.MOVE_RIGHT
+            return controls.MOVE_RIGHT
 
     def defend(self):
         movement_instructions = []

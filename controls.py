@@ -1,17 +1,14 @@
-from pygame import key
-from character import *
-import pygame
 
-from character import *
+from pygame.locals import *
+import pygame
+import random
+
 from projectile import *
-from pygame.math import Vector2 as Vector
+from character import *
 from point import *
 from wall import *
 
-from pygame import sprite 
-import pygame, sys
-from pygame.locals import *
-import random
+
 
 MOVE_LEFT = 1
 MOVE_RIGHT = 2

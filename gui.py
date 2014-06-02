@@ -1,14 +1,12 @@
-from game import *
-
 import math
-from pygame import sprite 
 import pygame, sys
 from pygame.locals import *
 import random
 
+from game import *
+
 
 game = Game(0)
-
 
 screen = pygame.display.set_mode((Game.FIELD_WIDTH, Game.FIELD_HEGHT))
 

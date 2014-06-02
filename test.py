@@ -1,12 +1,22 @@
 from game import *
-from pygame.time import Clock
+import time
+
 from gui import render_via_pygame as render
+from wall import *
+from bot import * 
 
 game = Game(0)
-clock = Clock()
+bot = Bot(game.player_2, game)
 
 while True:
-    time_passed = clock.tick(60)
-    #game.get_all_players_input()
-    game.update(time_passed)
+    game.update(controls.get_keyboard_input(), bot.get_input())
     render(game)
+
+    if not game.player_1.alive:
+        render(game)
+        break
+    if not game.player_2.alive:
+        render(game)
+        break
+
+time.sleep(2)
