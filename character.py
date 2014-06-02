@@ -1,8 +1,7 @@
-from pygame.sprite import Sprite, Group, Rect
+
 from point import *
 from projectile import *
-
-from input_getter import *
+from controls import *
 
 MOVING_LEFT = 0
 STATIONARY = 1
@@ -47,7 +46,7 @@ class Character():
             self.start_reloading()
 
     def shoot(self):
-        shot = Projectile(Point(self.position.x + self.size.y/2,
+        shot = Projectile(Point(self.position.x,
                                 self.position.y),
                           self.projectile_type.size,
                           self.projectile_type.speed,
@@ -109,3 +108,18 @@ class Character():
 
     def get_hit(self, projectile):
         self.health -= projectile.damage
+
+    @property
+    def x(self):
+        return self.position.x
+    @x.setter
+    def x(self, value):
+        self.position.x = value
+    
+    @property
+    def y(self):
+        return self.position.y
+    @y.setter
+    def y(self, value):
+        self.position.y = value
+    
