@@ -45,9 +45,9 @@ class Game:
     def init_sample_PVE_1v1(self):
         projectile_type = Projectile(Point(50, 50), Point(10, 10), 1, 5, Point(0, 0))        
         #self.player_1 = Berserker(Point(400, 550))
-        self.player_1 = Tank(Point(400, 440))
+        self.player_1 = Tank(Point(400, 520))
         self.player_1.aim = Point(400, 0)
-        self.player_2 = Character(Point(400, 50), \
+        self.player_2 = Character(Point(400, 80), \
                         Point(60, 60), 0.4, 300, projectile_type, 50, 5)
         self.player_2.aim = Point(400, 600)
 
@@ -70,11 +70,14 @@ class Game:
 
     def use_input(self, player, instruction_set, time_passed):
             if MOVE_LEFT in instruction_set:
-                player.state = MOVING_LEFT
+                #player.state = MOVING_LEFT
+                player.move_left(time_passed)
             elif MOVE_RIGHT in instruction_set:
-                player.state = MOVING_RIGHT
+                #player.state = MOVING_RIGHT
+                player.move_right(time_passed)
             else:
-                player.state = STATIONARY 
+                pass
+                #player.state = STATIONARY 
             if USE_SKILL in instruction_set:
                 player.use_skill()
             if AIM_LEFT in instruction_set:
