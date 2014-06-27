@@ -3,15 +3,15 @@ from point import *
 from projectile import *
 from controls import *
 
-MOVING_LEFT = 0
-STATIONARY = 1
-MOVING_RIGHT = 2
-DEAD = 3
+# MOVING_LEFT = 0
+# STATIONARY = 1
+# MOVING_RIGHT = 2
+# DEAD = 3
 
 class Character():
     def __init__(self, position, size, speed, reload_time_millisec,
                  projectile_type, health, damage):
-        self.state = STATIONARY
+        self.state = None
         self.position = position
         self.size = size
         self.speed = speed
@@ -29,13 +29,13 @@ class Character():
         self.alive = True
         self.vampire = False
 
-    def __move_left(self, time_passed):
+    def move_left(self, time_passed):
         if not self.snared:
             distance_traveled = self.speed * time_passed
             self.position.x -= distance_traveled
             self.aim.x -= distance_traveled # alternative aiming system
 
-    def __move_right(self, time_passed):
+    def move_right(self, time_passed):
         if not self.snared:
             distance_traveled = self.speed * time_passed
             self.position.x += distance_traveled
@@ -69,10 +69,10 @@ class Character():
         self.aim.x += self.aim_speed * time_passed
 
     def update(self, time_passed):
-        if self.state == MOVING_LEFT:
-            self.__move_left(time_passed)
-        if self.state == MOVING_RIGHT:
-            self.__move_right(time_passed)
+        # if self.state == MOVING_LEFT:
+        #     self.move_left(time_passed)
+        # if self.state == MOVING_RIGHT:
+        #     self.move_right(time_passed)
 
         if self.disarmed:
             self.disarm_time_left -= time_passed
