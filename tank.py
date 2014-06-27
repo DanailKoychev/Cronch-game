@@ -30,20 +30,11 @@ class Tank(character.Character):
             self.projectile_type.size.y *= 3.5
             self.aggressive_mode = True
 
-    def get_shot(self):
-        shot = character.Character.get_shot(self)
+    def shoot(self):
+        shot = character.Character.shoot(self)
         if self.aggressive_mode == True:
             self.damage = TANK_DAMAGE
             self.aggressive_mode = False
             self.projectile_type.size.x /= 3.5
             self.projectile_type.size.y /= 3.5
         return shot
-
-
-
-
-        # shot = self.try_shoot()
-        # self.damage = TANK_DAMAGE
-        # self.projectile_type.size.x /= 3.5
-        # self.projectile_type.size.y /= 3.5
-        # return shot
