@@ -1,5 +1,4 @@
-from pygame.math import Vector2 as Vector
-
+import vec2d
 import point
 
 class Projectile():
@@ -10,11 +9,14 @@ class Projectile():
         self.damage = damage
         self.aim = point.Point(aim.x, aim.y)
         self.owner = owner
+        self.movement_vector = self.get_movement_vector(self.aim)
 
     def get_movement_vector(self, aim):
-        movement_vector = Vector(aim.x - self.position.x,
+        if aim.x == self.position.x and aim.y == self.position.y:
+            return vec2d.Vec2D(0, 0)
+        movement_vector = vec2d.Vec2D(aim.x - self.position.x,
                                  aim.y - self.position.y)
-        movement_vector = movement_vector.normalize()
+        movement_vector.set_length(1)
         return movement_vector
 
     def update(self, time_passed):
