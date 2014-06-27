@@ -1,15 +1,12 @@
-from projectile import *
-from character import *
-from controls import *
-
 from itertools import product
-
 import math
 from random import randint
 
 from pygame.time import Clock
 
-
+from projectile import *
+from character import *
+from controls import *
 from berserker import *
 from tank import *
 
@@ -44,7 +41,7 @@ class Game:
 
     def init_sample_PVE_1v1(self):
         projectile_type = Projectile(Point(50, 50), Point(10, 10), 1, 5, Point(0, 0))        
-        #self.player_1 = Berserker(Point(400, 550))
+       # self.player_1 = Berserker(Point(400, 550))
         self.player_1 = Tank(Point(400, 520))
         self.player_1.aim = Point(400, 0)
         self.player_2 = Character(Point(400, 80), \
@@ -70,14 +67,9 @@ class Game:
 
     def use_input(self, player, instruction_set, time_passed):
             if MOVE_LEFT in instruction_set:
-                #player.state = MOVING_LEFT
                 player.move_left(time_passed)
             elif MOVE_RIGHT in instruction_set:
-                #player.state = MOVING_RIGHT
                 player.move_right(time_passed)
-            else:
-                pass
-                #player.state = STATIONARY 
             if USE_SKILL in instruction_set:
                 player.use_skill()
             if AIM_LEFT in instruction_set:
@@ -85,7 +77,7 @@ class Game:
             if AIM_RIGHT in instruction_set:
                 player.move_aim_right(time_passed)
             if SHOOT in instruction_set:
-                shot = player.try_get_shot()
+                shot = player.try_shoot()
                 if shot is not None:
                     self.active_projectiles.append(shot)
 
@@ -143,6 +135,7 @@ class Game:
                     projectile.owner.speed *= 1 + (SPEED_UP_PERCENT / 100)
                 elif wall.power_up == VAMIPIRE:
                     projectile.owner.vampire = True
+                    projectile.owner.vampire_time_left = VAMPIRE_TIME
                 elif wall.power_up == DISARM:
                     if projectile.owner == self.player_1:
                         self.player_2.disarmed = True
