@@ -3,10 +3,7 @@ from point import *
 from projectile import *
 from controls import *
 
-# MOVING_LEFT = 0
-# STATIONARY = 1
-# MOVING_RIGHT = 2
-# DEAD = 3
+AIM_SPEED = 0.7
 
 class Character():
     def __init__(self, position, size, speed, reload_time_millisec,
@@ -21,7 +18,7 @@ class Character():
         self.damage = damage
         self.own_projectiles = []
         self.aim = Point(0, 0)
-        self.aim_speed = 0.7
+        self.aim_speed = AIM_SPEED
 
         self.ready_to_shoot = True
         self.disarmed = False
@@ -33,20 +30,20 @@ class Character():
         if not self.snared:
             distance_traveled = self.speed * time_passed
             self.position.x -= distance_traveled
-            self.aim.x -= distance_traveled # alternative aiming system
+            self.aim.x -= distance_traveled
 
     def move_right(self, time_passed):
         if not self.snared:
             distance_traveled = self.speed * time_passed
             self.position.x += distance_traveled
-            self.aim.x += distance_traveled # alternative aiming system
+            self.aim.x += distance_traveled
  
-    def try_get_shot(self):
+    def try_shoot(self):
         if self.ready_to_shoot and not self.disarmed:
             self.start_reloading()
-            return self.get_shot()
+            return self.shoot()
 
-    def get_shot(self):
+    def shoot(self):
         shot = Projectile(Point(self.position.x,self.position.y),
                           Point(self.projectile_type.size.x,
                                 self.projectile_type.size.y),
@@ -69,15 +66,11 @@ class Character():
         self.aim.x += self.aim_speed * time_passed
 
     def update(self, time_passed):
-        # if self.state == MOVING_LEFT:
-        #     self.move_left(time_passed)
-        # if self.state == MOVING_RIGHT:
-        #     self.move_right(time_passed)
-
         if self.disarmed:
             self.disarm_time_left -= time_passed
             if self.disarm_time_left <= 0:
                 self.disarmed = False
+
         if self.snared:
             self.snare_time_left -= time_passed
             if self.snare_time_left <=0:
@@ -87,6 +80,11 @@ class Character():
             self.reload_time_left -= time_passed
             if self.reload_time_left <= 0:
                 self.ready_to_shoot = True
+
+        if self.vampire:
+            self.vampire_time_left -= time_passed
+            if self.vampire_time_left <= 0:
+                self.vampire = False
 
         if self.health <= 0:
             self.alive = False
