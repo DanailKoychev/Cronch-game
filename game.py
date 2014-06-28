@@ -35,14 +35,13 @@ class Game:
         self.player_2.aim = Point(player_1_position.x, player_1_position.y)
         self.walls = []
         self.active_projectiles = []
+        self.winner = None
 
     def create_character(position, character_type):
         if character_type == "berserker":
             return Berserker(position)
         elif character_type == "tank":
             return Tank(position)
-        elif character_type == "no_type":
-            return Character(position)
 
     def collide_rectangles(object_one, object_two):
         if math.fabs(object_one.position.x - object_two.position.x) < \
@@ -86,6 +85,11 @@ class Game:
         self.update_walls(time_passed)
         self.manage_wall_spawning(time_passed)
         self.manage_power_ups(time_passed)
+
+        if not self.player_1.alive:
+            self.winner = self.player_2
+        elif not self.player_2.alive:
+            self.winner = self.player_1
 
     def update_players(self, time_passed):
         for player in (self.player_1, self.player_2):
