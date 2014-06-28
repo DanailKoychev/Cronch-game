@@ -4,10 +4,10 @@ import point
 
 class Berserker(character.Character):
 
-    SIZE = point.Point(55, 55)
+    SIZE = point.Point(50, 50)
     SPEED = 0.4
     RELOAD_TIME = 150
-    HEALTH = 150
+    HEALTH = 120
     DAMAGE = 4
     PROJECTILE_TYPE = projectile.Projectile(point.Point(0, 0),
                                             point.Point(10, 10),
