@@ -2,38 +2,44 @@ import character
 import projectile
 import point
 
-TANK_SIZE = point.Point(80, 80)
-TANK_SPEED = 0.3
-TANK_RELOAD_TIME = 300
-TANK_PROJECTILE_TYPE = projectile.Projectile(point.Point(50, 50),
-                                             point.Point(10, 10),
-                                             1, 1, point.Point(0, 0))
-TANK_HEALTH = 350
-TANK_DAMAGE = 1
-
-MISSLE_DAMAGE = 15
-MISSLE_HEALTH_COST = 15
-
 class Tank(character.Character):
 
+    SIZE = point.Point(80, 80)
+    SPEED = 0.3
+    RELOAD_TIME = 300
+    PROJECTILE_TYPE = projectile.Projectile(point.Point(50, 50),
+                                                 point.Point(10, 10),
+                                                 1, 1, point.Point(0, 0))
+    HEALTH = 350
+    DAMAGE = 1
+    ATTRIBUTES = [SIZE, SPEED, RELOAD_TIME, PROJECTILE_TYPE, HEALTH, DAMAGE]
+
+    MISSILE_DAMAGE = 15
+    MISSILE_HEALTH_COST = 15
+    MISSLE_COOLDOWN = 600
+
     def __init__(self, position):
-        character.Character.__init__(self, position, TANK_SIZE,
-            TANK_SPEED, TANK_RELOAD_TIME, TANK_PROJECTILE_TYPE,
-            TANK_HEALTH, TANK_DAMAGE)
+        character.Character.__init__(self, position, *Tank.ATTRIBUTES)
         self.aggressive_mode = False
+        self.missile_cooldown = 0
 
     def use_skill(self):
-        if self.aggressive_mode == False:
-            self.damage = MISSLE_DAMAGE
-            self.health -= MISSLE_HEALTH_COST
+        if self.aggressive_mode == False and self.missile_cooldown <= 0:
+            self.damage = Tank.MISSILE_DAMAGE
+            self.health -= Tank.MISSILE_HEALTH_COST
             self.projectile_type.size.x *= 3.5
             self.projectile_type.size.y *= 3.5
             self.aggressive_mode = True
+            self.missile_cooldown = Tank.MISSLE_COOLDOWN 
+
+    def update(self, time_passed):
+        character.Character.update(self, time_passed)
+        self.missile_cooldown -= time_passed
 
     def shoot(self):
         shot = character.Character.shoot(self)
         if self.aggressive_mode == True:
-            self.damage = TANK_DAMAGE
+            self.damage = Tank.DAMAGE
             self.aggressive_mode = False
             self.projectile_type.size.x /= 3.5
             self.projectile_type.size.y /= 3.5

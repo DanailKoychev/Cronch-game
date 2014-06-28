@@ -9,7 +9,7 @@ class Controls:
     AIM_RIGHT = 5
     SHOOT = 6
 
-    def get_keyboard_input_player_1():
+    def get_keyboard_input_player_2():
         instructions = []
         keys = pygame.key.get_pressed()
         if keys[K_KP1]:
@@ -26,7 +26,7 @@ class Controls:
             instructions.append(Controls.SHOOT)
         return instructions
 
-    def get_keyboard_input_player_2():
+    def get_keyboard_input_player_1():
         instructions = []
         keys = pygame.key.get_pressed()
         if keys[K_g]:

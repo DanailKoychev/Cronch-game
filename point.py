@@ -13,3 +13,6 @@ class Point:
         self.x += vector.x
         self.y += vector.y
         return self
+
+    def __eq__(self, point):
+        return self.x == point.x and self.y == point.y

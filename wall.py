@@ -2,8 +2,6 @@ import random
 
 from point import *
 
-WALL_SPEED = 0.09
-
 HEAL = 0
 SNARE = 1
 VAMIPIRE = 2
@@ -19,10 +17,13 @@ SNARE_TIME_MILLISEC = 2000
 DAMAGE_UP_PERCENT = 30
 
 class Wall():
+
+    SPEED = 0.09
+
     def __init__(self, size, going_right, field_width, field_height):
         self.size = size
         self.going_right = going_right
-        self.speed = WALL_SPEED
+        self.speed = Wall.SPEED
         self.position = Point(0,0)
         self.position.y = field_height/2
         if going_right:

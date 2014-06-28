@@ -2,33 +2,38 @@ import math
 import pygame, sys
 from pygame.locals import *
 import random
+import time
 
-from bot import *
+import controls
+import tank_bot
+import berserker_bot
 
 from game import *
 
 FPS = 120
+pygame.init()
+game = Game("berserker", "tank")
+clock = pygame.time.Clock()
 
-game = Game(0)
 
 screen = pygame.display.set_mode((game.field_width, game.field_height))
 
 background = pygame.image.load("assets/background.png").convert()
 
-player_one_image = pygame.image.load("assets/character.png").convert()
-player_one_image = pygame.transform.scale(player_one_image, \
+player_1_image = pygame.image.load("assets/character.png").convert()
+player_1_image = pygame.transform.scale(player_1_image, \
                    (game.player_1.size.x, game.player_1.size.y))
 
-player_two_image = pygame.image.load("assets/character.png").convert()
-player_two_image = pygame.transform.scale(player_two_image, \
+player_2_image = pygame.image.load("assets/character.png").convert()
+player_2_image = pygame.transform.scale(player_2_image, \
                    (game.player_2.size.x, game.player_2.size.y))
-player_two_image = pygame.transform.flip(player_two_image, False, True)
+player_2_image = pygame.transform.flip(player_2_image, False, True)
 
 dead_player_image = pygame.image.load("assets/dead_character.png").convert()
 dead_player_image = pygame.transform.scale(dead_player_image, \
                     (game.player_1.size.x, game.player_1.size.y))
 
-projectile_image = pygame.image.load("assets/projectile.jpg").convert()
+projectile_image = pygame.image.load("assets/projectile.png").convert()
 projectile_image = pygame.transform.scale(projectile_image, \
  (game.player_1.projectile_type.size.x, game.player_1.projectile_type.size.y))
 
@@ -54,24 +59,10 @@ wall_disarm = pygame.transform.scale(wall_disarm, (100, 8))
 wall_vampire = pygame.image.load("assets/wall_vampire.jpg").convert()
 wall_vampire = pygame.transform.scale(wall_vampire, (100, 8))
 
-pygame.font.init()
 myfont = pygame.font.SysFont("monospace", 15)
 
-#aim_image = pygame.image.load("assets/wall.jpg").convert()
-#aim_image = pygame.transform.scale(wall_image, (5, 5))
 
-#font = pygame.font.SysFont("monospace", 30)
-
-#game = Game(0)
-bot = Bot(game.player_2, game)
-
-
-def render_via_pygame(game):
-    screen.blit(background, (0, 0))
-
-    players = (game.player_1, game.player_2)
-    images = [player_one_image, player_two_image]
-
+def draw_projectiles(game):
     for projectile in game.active_projectiles:
         if projectile.owner.vampire == True:
             image = projectile_vampire
@@ -83,18 +74,15 @@ def render_via_pygame(game):
                     (projectile.position.x - projectile.size.x / 2, \
                     projectile.position.y - projectile.size.y / 2))
 
-    for player, image in zip(players, images):
-        if not player.alive:
-            image = dead_player_image
-        screen.blit(pygame.transform.rotate(image, get_leaning(player)), \
-                    (player.position.x - player.size.x / 2, \
-                     player.position.y - player.size.y / 2))
 
+def draw_health(game):
     hp_1 = myfont.render(str(int(game.player_1.health)), 1, (255,255,0))
-    screen.blit(hp_1, (game.player_1.x, game.player_1.y + game.player_1.size.y - 25))
+    screen.blit(hp_1, (game.player_1.x, game.player_1.y + game.player_1.size.y / 2 + 10))
     hp_2 = myfont.render(str(int(game.player_2.health)), 1, (255,255,0))
-    screen.blit(hp_2, (game.player_2.x, game.player_2.y - game.player_2.size.y + 15))
+    screen.blit(hp_2, (game.player_2.x, game.player_2.y - game.player_2.size.y / 2 - 20))    
 
+
+def draw_walls(game):
     for wall in game.walls:
         if wall.power_up == HEAL:
             screen.blit(wall_heal, (wall.position.x - wall.size.x/2, \
@@ -115,11 +103,30 @@ def render_via_pygame(game):
             screen.blit(wall_image, (wall.position.x - wall.size.x/2, \
                         wall.position.y - wall.size.y/2))
 
+
+def draw_players(game):
+    players = (game.player_1, game.player_2)
+    images = [player_1_image, player_2_image]
+    for player, image in zip(players, images):
+        if not player.alive:
+            image = dead_player_image
+        screen.blit(pygame.transform.rotate(image, get_leaning(player)), \
+                    (player.position.x - player.size.x / 2, \
+                     player.position.y - player.size.y / 2))
+
+
+def render_game(game):
+    screen.blit(background, (0, 0))
+    draw_projectiles(game)    
+    draw_players(game)
+    draw_health(game)
+    draw_walls(game)
     pygame.display.flip()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
+
 
 def get_leaning(player):
     if player.position.x == player.aim.x:
@@ -130,20 +137,43 @@ def get_leaning(player):
                          # 57.3 - approximate degree-to-radian ratio
 
 
+def watch_sample_fight():
+    bot_1 = tank_bot.TankBot(game.player_2, game)
+    bot_2 = berserker_bot.Berserker_bot(game.player_1, game)
 
+    while True:
+        time_passed = clock.tick(FPS)
+        bot_1.update(time_passed)
+        bot_2.update(time_passed)
+        game.update(bot_1.get_input(), bot_2.get_input(), time_passed)
+        render_game(game)
+        if game.winner is not None:
+            break
+    time.sleep(2)
 
-#------------------------
-clock = pygame.time.Clock()
-while True:
-    time_passed = clock.tick(FPS)
-    game.update(controls.get_keyboard_input_player_1(), bot.get_input(), time_passed)
-    render_via_pygame(game)
+def play_vs_human():
+    while True:
+        time_passed = clock.tick(FPS)
+        game.update(controls.Controls.get_keyboard_input_player_1(),
+                    controls.Controls.get_keyboard_input_player_2(),
+                    time_passed)
+        render_game(game)
+        if game.winner is not None:
+            break
+    time.sleep(2)
 
-    if not game.player_1.alive:
-        render(game)
-        break
-    if not game.player_2.alive:
-        render(game)
-        break
-        
-time.sleep(2)
+def play_vs_computer():
+    bot = tank_bot.TankBot(game.player_2, game)
+
+    while True:
+        time_passed = clock.tick(FPS)
+        bot.update(time_passed)
+        game.update(controls.Controls.get_keyboard_input_player_1(), \
+        #game.update(bot_1.get_input(), \
+                    bot.get_input(), time_passed),
+                    #controls.Controls.get_keyboard_input_player_2(), time_passed)
+        render_game(game)
+        if game.winner is not None:
+            break
+
+    time.sleep(2)
