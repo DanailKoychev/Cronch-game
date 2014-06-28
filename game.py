@@ -2,7 +2,7 @@ from itertools import product
 import math
 from random import randint
 
-from pygame.time import Clock
+#from pygame.time import Clock
 
 from projectile import *
 from character import *
@@ -34,7 +34,7 @@ class Game:
                                             self.POWER_UP_SPAWN_TIME_RANGE[0],
                                             self.POWER_UP_SPAWN_TIME_RANGE[1]
                                             )
-        self.Clock = Clock()
+   #     self.Clock = Clock()
 
     #def init_PVE_1v1(self, character_type_1, character_type_2):
     # 
@@ -44,8 +44,8 @@ class Game:
        # self.player_1 = Berserker(Point(400, 550))
         self.player_1 = Tank(Point(400, 520))
         self.player_1.aim = Point(400, 0)
-        self.player_2 = Character(Point(400, 80), \
-                        Point(60, 60), 0.4, 300, projectile_type, 50, 5)
+        self.player_2 = Berserker(Point(400, 80))#, \
+                        #Point(60, 60), 0.4, 300, projectile_type, 50, 5)
         self.player_2.aim = Point(400, 600)
 
         self.walls = []
@@ -81,8 +81,8 @@ class Game:
                 if shot is not None:
                     self.active_projectiles.append(shot)
 
-    def update(self, instrucions_player_1, instrucions_player_2):
-        time_passed = self.Clock.tick(Game.FPS)
+    def update(self, instrucions_player_1, instrucions_player_2, time_passed):
+        #time_passed = self.Clock.tick(Game.FPS)
 
         for player, instruction_set in ((self.player_1, instrucions_player_1),\
                                        (self.player_2, instrucions_player_2)):
