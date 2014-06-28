@@ -3,9 +3,10 @@ from point import *
 from projectile import *
 from controls import *
 
-AIM_SPEED = 0.7
-
 class Character():
+
+    AIM_SPEED = 0.7
+
     def __init__(self, position, size, speed, reload_time_millisec,
                  projectile_type, health, damage):
         self.state = None
@@ -18,7 +19,7 @@ class Character():
         self.damage = damage
         self.own_projectiles = []
         self.aim = Point(0, 0)
-        self.aim_speed = AIM_SPEED
+        self.aim_speed = Character.AIM_SPEED
 
         self.ready_to_shoot = True
         self.disarmed = False
