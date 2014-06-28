@@ -29,9 +29,9 @@ class Controls:
     def get_keyboard_input_player_1():
         instructions = []
         keys = pygame.key.get_pressed()
-        if keys[K_j]:
-            instructions.append(Controls.MOVE_LEFT)
         if keys[K_g]:
+            instructions.append(Controls.MOVE_LEFT)
+        if keys[K_j]:
             instructions.append(Controls.MOVE_RIGHT)
         if keys[K_y]:
             instructions.append(Controls.USE_SKILL)
