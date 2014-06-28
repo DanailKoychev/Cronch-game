@@ -14,13 +14,14 @@ from game import *
 
 FPS = 120
 pygame.init()
-game = Game("tank", "berserker")
 clock = pygame.time.Clock()
-
-
-screen = pygame.display.set_mode((game.field_width, game.field_height))
+screen = pygame.display.set_mode((Game.FIELD_WIDTH, Game.FIELD_HEIGHT))
+game = Game("berserker", "tank")
 
 background = pygame.image.load("assets/background.png").convert()
+
+myfont = pygame.font.SysFont("monospace", 15)
+
 
 player_1_image = pygame.image.load("assets/berserker.png").convert()
 player_1_image = pygame.transform.scale(player_1_image, \
@@ -61,7 +62,9 @@ wall_disarm = pygame.transform.scale(wall_disarm, (100, 8))
 wall_vampire = pygame.image.load("assets/wall_vampire.jpg").convert()
 wall_vampire = pygame.transform.scale(wall_vampire, (100, 8))
 
-myfont = pygame.font.SysFont("monospace", 15)
+
+
+
 
 
 def draw_projectiles(game):
