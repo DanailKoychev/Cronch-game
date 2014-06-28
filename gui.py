@@ -3,11 +3,13 @@ import pygame, sys
 from pygame.locals import *
 import random
 
+from bot import *
+
 from game import *
 
-# --------------------------------------------!
+FPS = 120
+
 game = Game(0)
-# --------------------------------------------!
 
 screen = pygame.display.set_mode((game.field_width, game.field_height))
 
@@ -59,6 +61,10 @@ myfont = pygame.font.SysFont("monospace", 15)
 #aim_image = pygame.transform.scale(wall_image, (5, 5))
 
 #font = pygame.font.SysFont("monospace", 30)
+
+#game = Game(0)
+bot = Bot(game.player_2, game)
+
 
 def render_via_pygame(game):
     screen.blit(background, (0, 0))
@@ -122,3 +128,22 @@ def get_leaning(player):
         return math.atan((player.aim.x - player.position.x) / \
                          (player.aim.y - player.position.y)) * 57.3 
                          # 57.3 - approximate degree-to-radian ratio
+
+
+
+
+#------------------------
+clock = pygame.time.Clock()
+while True:
+    time_passed = clock.tick(FPS)
+    game.update(controls.get_keyboard_input_player_1(), bot.get_input(), time_passed)
+    render_via_pygame(game)
+
+    if not game.player_1.alive:
+        render(game)
+        break
+    if not game.player_2.alive:
+        render(game)
+        break
+        
+time.sleep(2)
