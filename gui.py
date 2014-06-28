@@ -9,6 +9,7 @@ import tank
 import berserker
 import tank_bot
 import berserker_bot
+from wall import Wall
 
 from game import *
 
@@ -92,16 +93,16 @@ def draw_walls(game):
         if wall.power_up == HEAL:
             screen.blit(wall_heal, (wall.position.x - wall.size.x/2, \
                         wall.position.y - wall.size.y/2))        
-        elif wall.power_up == SPEED_UP:
+        elif wall.power_up == Wall.SPEED_UP:
             screen.blit(wall_speed_up, (wall.position.x - wall.size.x/2, \
                         wall.position.y - wall.size.y/2)) 
-        elif wall.power_up == SNARE:
+        elif wall.power_up == Wall.SNARE:
             screen.blit(wall_snare, (wall.position.x - wall.size.x/2, \
                         wall.position.y - wall.size.y/2)) 
-        elif wall.power_up == DISARM:
+        elif wall.power_up == Wall.DISARM:
             screen.blit(wall_disarm, (wall.position.x - wall.size.x/2, \
                         wall.position.y - wall.size.y/2)) 
-        elif wall.power_up == VAMIPIRE:
+        elif wall.power_up == Wall.VAMIPIRE:
             screen.blit(wall_vampire, (wall.position.x - wall.size.x/2, \
                         wall.position.y - wall.size.y/2))
         else:
