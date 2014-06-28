@@ -23,11 +23,9 @@ background = pygame.image.load("assets/background.png").convert()
 
 myfont = pygame.font.SysFont("monospace", 15)
 
-
 player_1_image = pygame.image.load("assets/berserker.png").convert()
 player_1_image = pygame.transform.scale(player_1_image, \
                    (game.player_1.size.x, game.player_1.size.y))
-
 player_2_image = pygame.image.load("assets/tank.png").convert()
 player_2_image = pygame.transform.scale(player_2_image, \
                    (game.player_2.size.x, game.player_2.size.y))
@@ -64,10 +62,6 @@ wall_vampire = pygame.image.load("assets/wall_vampire.jpg").convert()
 wall_vampire = pygame.transform.scale(wall_vampire, (100, 8))
 
 
-
-
-
-
 def draw_projectiles(game):
     for projectile in game.active_projectiles:
         if projectile.owner.vampire == True:
@@ -90,7 +84,7 @@ def draw_health(game):
 
 def draw_walls(game):
     for wall in game.walls:
-        if wall.power_up == HEAL:
+        if wall.power_up == Wall.HEAL:
             screen.blit(wall_heal, (wall.position.x - wall.size.x/2, \
                         wall.position.y - wall.size.y/2))        
         elif wall.power_up == Wall.SPEED_UP:
