@@ -5,6 +5,8 @@ import random
 import time
 
 import controls
+import tank
+import berserker
 import tank_bot
 import berserker_bot
 
@@ -12,7 +14,7 @@ from game import *
 
 FPS = 120
 pygame.init()
-game = Game("berserker", "tank")
+game = Game("tank", "berserker")
 clock = pygame.time.Clock()
 
 
@@ -20,11 +22,11 @@ screen = pygame.display.set_mode((game.field_width, game.field_height))
 
 background = pygame.image.load("assets/background.png").convert()
 
-player_1_image = pygame.image.load("assets/character.png").convert()
+player_1_image = pygame.image.load("assets/berserker.png").convert()
 player_1_image = pygame.transform.scale(player_1_image, \
                    (game.player_1.size.x, game.player_1.size.y))
 
-player_2_image = pygame.image.load("assets/character.png").convert()
+player_2_image = pygame.image.load("assets/tank.png").convert()
 player_2_image = pygame.transform.scale(player_2_image, \
                    (game.player_2.size.x, game.player_2.size.y))
 player_2_image = pygame.transform.flip(player_2_image, False, True)
@@ -138,8 +140,14 @@ def get_leaning(player):
 
 
 def watch_sample_fight():
-    bot_1 = tank_bot.TankBot(game.player_2, game)
-    bot_2 = berserker_bot.Berserker_bot(game.player_1, game)
+    if game.player_1.__class__ == tank.Tank:
+        bot_1 = tank_bot.TankBot(game.player_1, game)
+    else:
+        bot_1 = berserker_bot.BerserkerBot(game.player_1, game)
+    if game.player_2.__class__ == berserker.Berserker:
+        bot_2 = berserker_bot.BerserkerBot(game.player_2, game)
+    else:
+        bot_2 = tank_bot.TankBot(game.player_2, game)
 
     while True:
         time_passed = clock.tick(FPS)
@@ -163,17 +171,17 @@ def play_vs_human():
     time.sleep(2)
 
 def play_vs_computer():
-    bot = tank_bot.TankBot(game.player_2, game)
+    if game.player_2.__class__ == tank.Tank:
+        bot = tank_bot.TankBot(game.player_2, game)
+    else:
+        bot = berserker_bot.BerserkerBot(game.player_2, game)
 
     while True:
         time_passed = clock.tick(FPS)
         bot.update(time_passed)
         game.update(controls.Controls.get_keyboard_input_player_1(), \
-        #game.update(bot_1.get_input(), \
                     bot.get_input(), time_passed),
-                    #controls.Controls.get_keyboard_input_player_2(), time_passed)
         render_game(game)
         if game.winner is not None:
             break
-
     time.sleep(2)
