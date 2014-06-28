@@ -2,13 +2,13 @@ from itertools import product
 import math
 from random import randint
 
-#from pygame.time import Clock
-
+from point import *
 from projectile import *
 from character import *
 from controls import *
 from berserker import *
 from tank import *
+from wall import *
 
 class Game: 
     FIELD_HEIGHT = 600
@@ -16,48 +16,40 @@ class Game:
     WALL_SPAWN_TIME_RANGE = (2400, 5900)
     POWER_UP_SPAWN_TIME_RANGE = (4800, 7300)
 
+    character_types = ["no_type", "tank", "berserker"]
+
     FPS = 120
 
     PVE = 0
     PVP = 1
  
-    def __init__(self, game_mode=PVE):
-        if game_mode == Game.PVE:
-            Game.init_sample_PVE_1v1(self)
-        elif game_mode == Game.PVP:
-            raise NotImplementedError("no pvp yet")
-
+    def __init__(self, player_1_type="no_type", player_2_type="no_type"):
         self.field_width = Game.FIELD_WIDTH
         self.field_height = Game.FIELD_HEIGHT
-        self.time_since_last_wall = 0
-        self.time_since_last_power_up = randint(
+        self.time_to_next_wall = 0
+        self.time_to_next_power_up = randint(
                                             self.POWER_UP_SPAWN_TIME_RANGE[0],
                                             self.POWER_UP_SPAWN_TIME_RANGE[1]
                                             )
-   #     self.Clock = Clock()
+        player_1_position = Point(self.field_width / 2, self.field_height  * 7 / 8)
+        player_2_position = Point(self.field_width / 2, self.field_width / 8)
 
-    #def init_PVE_1v1(self, character_type_1, character_type_2):
-    # 
-
-    def init_sample_PVE_1v1(self):
-        projectile_type = Projectile(Point(50, 50), Point(10, 10), 1, 5, Point(0, 0))        
-       # self.player_1 = Berserker(Point(400, 550))
-        self.player_1 = Tank(Point(400, 520))
-        self.player_1.aim = Point(400, 0)
-        self.player_2 = Berserker(Point(400, 80))#, \
-                        #Point(60, 60), 0.4, 300, projectile_type, 50, 5)
-        self.player_2.aim = Point(400, 600)
-
+        self.player_1 = Game.create_character(player_1_position, player_1_type)
+        self.player_1.aim = Point(player_2_position.x, player_2_position.y)
+        self.player_2 = Game.create_character(player_2_position, player_2_type)
+        self.player_2.aim = Point(player_1_position.x, player_1_position.y)
         self.walls = []
-
         self.active_projectiles = []
 
-    def get_all_players_input(self):
-        players_input = zip(self.human_players, 
-                        [get_keyboard_input() for player in self.human_players])
-        return players_input
+    def create_character(position, character_type):
+        if character_type == "berserker":
+            return Berserker(position)
+        elif character_type == "tank":
+            return Tank(position)
+        elif character_type == "no_type":
+            return Character(position)
 
-    def collide(self, object_one, object_two):
+    def collide_rectangles(object_one, object_two):
         if math.fabs(object_one.position.x - object_two.position.x) < \
            object_one.size.x / 2 + object_two.size.x / 2 and \
            math.fabs(object_one.position.y - object_two.position.y) < \
@@ -65,25 +57,29 @@ class Game:
             return True
         return False
 
+    def collide_circles(object_one, object_two):
+        return math.sqrt(
+            math.fabs(object_one.position.x - object_two.position.x) ** 2 + \
+            math.fabs(object_one.position.y - object_two.position.y) ** 2) < \
+            (object_one.size.y + object_two.size.y) / 2
+
     def use_input(self, player, instruction_set, time_passed):
-            if MOVE_LEFT in instruction_set:
+            if Controls.MOVE_LEFT in instruction_set:
                 player.move_left(time_passed)
-            elif MOVE_RIGHT in instruction_set:
+            elif Controls.MOVE_RIGHT in instruction_set:
                 player.move_right(time_passed)
-            if USE_SKILL in instruction_set:
+            if Controls.USE_SKILL in instruction_set:
                 player.use_skill()
-            if AIM_LEFT in instruction_set:
+            if Controls.AIM_LEFT in instruction_set:
                 player.move_aim_left(time_passed)
-            if AIM_RIGHT in instruction_set:
+            if Controls.AIM_RIGHT in instruction_set:
                 player.move_aim_right(time_passed)
-            if SHOOT in instruction_set:
+            if Controls.SHOOT in instruction_set:
                 shot = player.try_shoot()
                 if shot is not None:
                     self.active_projectiles.append(shot)
 
     def update(self, instrucions_player_1, instrucions_player_2, time_passed):
-        #time_passed = self.Clock.tick(Game.FPS)
-
         for player, instruction_set in ((self.player_1, instrucions_player_1),\
                                        (self.player_2, instrucions_player_2)):
             self.use_input(player, instruction_set, time_passed)
@@ -104,8 +100,8 @@ class Game:
                player.x = player.size.x / 2;
             player.update(time_passed)
 
-            if player.aim.x < - self.field_height / 3:
-                player.aim.x = - self.field_height / 3
+            if player.aim.x < - self.field_width / 2:
+                player.aim.x = - self.field_width / 2
             if player.aim.x > self.field_width + self.field_height / 3:
                 player.aim.x = self.field_width + self.field_height / 3
 
@@ -117,7 +113,7 @@ class Game:
         for player, projectile in product((self.player_1, self.player_2), \
                                            self.active_projectiles):
             if projectile not in player.own_projectiles and \
-               self.collide(projectile, player):
+               Game.collide_circles(projectile, player):
                 player.get_hit(projectile)
                 self.active_projectiles.remove(projectile)
 
@@ -126,7 +122,7 @@ class Game:
 
     def handle_wall_collisions(self):
         for projectile, wall in product(self.active_projectiles, self.walls):
-            if self.collide(projectile, wall):
+            if Game.collide_rectangles(projectile, wall):
                 self.active_projectiles.remove(projectile)
 
                 if wall.power_up == HEAL:
@@ -153,18 +149,18 @@ class Game:
                 wall.power_up = None
 
     def manage_wall_spawning(self, time_passed):
-        self.time_since_last_wall -= time_passed
-        if self.time_since_last_wall <= 0:
-            self.time_since_last_wall = randint(Game.WALL_SPAWN_TIME_RANGE[0], \
+        self.time_to_next_wall -= time_passed
+        if self.time_to_next_wall <= 0:
+            self.time_to_next_wall = randint(Game.WALL_SPAWN_TIME_RANGE[0], \
                                                 Game.WALL_SPAWN_TIME_RANGE[1])
             self.walls.append(Wall(Point(100, 5), False, self.field_width, \
                                    self.field_height))
 
     def manage_power_ups(self, time_passed):
-        self.time_since_last_power_up -= time_passed
-        if self.time_since_last_power_up <= 0:
+        self.time_to_next_power_up -= time_passed
+        if self.time_to_next_power_up <= 0:
             self.walls[randint(0, len(self.walls) - 1)].power_up = randint(0, 4)
-            self.time_since_last_power_up = randint(
+            self.time_to_next_power_up = randint(
                                             self.POWER_UP_SPAWN_TIME_RANGE[0],
                                             self.POWER_UP_SPAWN_TIME_RANGE[1]
                                             )
