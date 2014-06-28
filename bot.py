@@ -178,6 +178,3 @@ class Bot:
                 self.defensive = True;
             else:
                 self.defensive = False
-
-        # if self.is_hidden():
-        #     print("dsfjusghuhsdfaglasdfgkjasdkjgn")
