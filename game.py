@@ -117,7 +117,7 @@ class Game:
                 self.active_projectiles.remove(projectile)
 
                 if projectile.owner.vampire == True:
-                    projectile.owner.health += projectile.damage * (VAMPIRE_PERCENT / 100)
+                    projectile.owner.health += projectile.damage * (Wall.VAMPIRE_PERCENT / 100)
 
     def handle_wall_collisions(self):
         for projectile, wall in product(self.active_projectiles, self.walls):
@@ -125,26 +125,26 @@ class Game:
                 self.active_projectiles.remove(projectile)
 
                 if wall.power_up == Wall.HEAL:
-                    projectile.owner.health += HEAL_VALUE
+                    projectile.owner.health += Wall.HEAL_VALUE
                 elif wall.power_up == Wall.SPEED_UP:
-                    projectile.owner.speed *= 1 + (SPEED_UP_PERCENT / 100)
+                    projectile.owner.speed *= 1 + (Wall.SPEED_UP_PERCENT / 100)
                 elif wall.power_up == Wall.VAMIPIRE:
                     projectile.owner.vampire = True
-                    projectile.owner.vampire_time_left = VAMPIRE_TIME
+                    projectile.owner.vampire_time_left = Wall.VAMPIRE_TIME
                 elif wall.power_up == Wall.DISARM:
                     if projectile.owner == self.player_1:
                         self.player_2.disarmed = True
-                        self.player_2.disarm_time_left = DISARM_TIME_MILLISEC
+                        self.player_2.disarm_time_left = Wall.DISARM_TIME_MILLISEC
                     else:
                         self.player_1.disarmed = True
-                        self.player_1.disarm_time_left = DISARM_TIME_MILLISEC
+                        self.player_1.disarm_time_left = Wall.DISARM_TIME_MILLISEC
                 elif wall.power_up == Wall.SNARE:
                     if projectile.owner == self.player_1:
                         self.player_2.snared = True
-                        self.player_2.snare_time_left = SNARE_TIME_MILLISEC
+                        self.player_2.snare_time_left = Wall.SNARE_TIME_MILLISEC
                     else:
                         self.player_1.snared = True
-                        self.player_1.snare_time_left = SNARE_TIME_MILLISEC
+                        self.player_1.snare_time_left = Wall.SNARE_TIME_MILLISEC
                 wall.power_up = None
 
     def manage_wall_spawning(self, time_passed):
