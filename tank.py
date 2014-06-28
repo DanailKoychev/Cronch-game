@@ -15,7 +15,7 @@ class Tank(character.Character):
     ATTRIBUTES = [SIZE, SPEED, RELOAD_TIME, PROJECTILE_TYPE, HEALTH, DAMAGE]
 
     MISSILE_DAMAGE = 15
-    MISSILE_HEALTH_COST = 15
+    MISSILE_HEALTH_COST = 7
     MISSLE_COOLDOWN = 600
 
     def __init__(self, position):
