@@ -61,7 +61,7 @@ class Bot:
                             int(enemy_movement_range[1]))
                             #int(enemy_movement_range[0] + self.enemy.size.x),\
                             #int(enemy_movement_range[1] - self.enemy.size.x))
-        return controls.Controls.SHOOT
+            return controls.Controls.SHOOT
 
     def snipe(self):
         if self.character.ready_to_shoot:
@@ -135,13 +135,6 @@ class Bot:
            return True
         return False
 
-    def move_randomly(self):
-        move = random.randint(0,2)
-        if move == 0:
-            return controls.Controls.MOVE_LEFT
-        elif move == 2:
-            return controls.Controls.MOVE_RIGHT
-
     def offence(self):
         movement_instructions = []
         self.wall_shield = self.get_closest_wall()
@@ -180,7 +173,7 @@ class Bot:
     def update(self, time_passed):
         self.time_until_behavior_change -= time_passed
         if self.time_until_behavior_change <= 0:
-            self.time_until_behavior_change = random.randint(2000, 6000)
+            self.time_until_behavior_change = random.randint(700, 3000)
             if random.randint(0, 1):
                 self.defensive = True;
             else:
