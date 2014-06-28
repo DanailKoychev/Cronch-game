@@ -9,3 +9,4 @@ class BerserkerBot(bot.Bot):
             self.defensive = False
         if self.character.health < (1 / 5) * berserker.Berserker.HEALTH:
             self.defensive = True;
+ 
