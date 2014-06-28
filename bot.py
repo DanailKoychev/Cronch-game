@@ -59,8 +59,6 @@ class Bot:
             self.character.aim.x = random.randint( \
                             int(enemy_movement_range[0]),\
                             int(enemy_movement_range[1]))
-                            #int(enemy_movement_range[0] + self.enemy.size.x),\
-                            #int(enemy_movement_range[1] - self.enemy.size.x))
             return controls.Controls.SHOOT
 
     def snipe(self):
