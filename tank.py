@@ -4,7 +4,7 @@ import point
 
 class Tank(character.Character):
 
-    SIZE = point.Point(80, 80)
+    SIZE = point.Point(90, 90)
     SPEED = 0.3
     RELOAD_TIME = 300
     PROJECTILE_TYPE = projectile.Projectile(point.Point(50, 50),
