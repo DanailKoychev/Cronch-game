@@ -17,11 +17,6 @@ class Game:
     POWER_UP_SPAWN_TIME_RANGE = (4800, 7300)
 
     character_types = ["no_type", "tank", "berserker"]
-
-    FPS = 120
-
-    PVE = 0
-    PVP = 1
  
     def __init__(self, player_1_type="no_type", player_2_type="no_type"):
         self.field_width = Game.FIELD_WIDTH
