@@ -124,21 +124,21 @@ class Game:
             if Game.collide_rectangles(projectile, wall):
                 self.active_projectiles.remove(projectile)
 
-                if wall.power_up == HEAL:
+                if wall.power_up == Wall.HEAL:
                     projectile.owner.health += HEAL_VALUE
-                elif wall.power_up == SPEED_UP:
+                elif wall.power_up == Wall.SPEED_UP:
                     projectile.owner.speed *= 1 + (SPEED_UP_PERCENT / 100)
-                elif wall.power_up == VAMIPIRE:
+                elif wall.power_up == Wall.VAMIPIRE:
                     projectile.owner.vampire = True
                     projectile.owner.vampire_time_left = VAMPIRE_TIME
-                elif wall.power_up == DISARM:
+                elif wall.power_up == Wall.DISARM:
                     if projectile.owner == self.player_1:
                         self.player_2.disarmed = True
                         self.player_2.disarm_time_left = DISARM_TIME_MILLISEC
                     else:
                         self.player_1.disarmed = True
                         self.player_1.disarm_time_left = DISARM_TIME_MILLISEC
-                elif wall.power_up == SNARE:
+                elif wall.power_up == Wall.SNARE:
                     if projectile.owner == self.player_1:
                         self.player_2.snared = True
                         self.player_2.snare_time_left = SNARE_TIME_MILLISEC
